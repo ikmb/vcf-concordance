@@ -19,13 +19,19 @@ params.version = workflow.manifest.version
 // Help message
 helpMessage = """
 ===============================================================================
-IKMB XXX pipeline | version ${params.version}
+IKMB variant concordance pipeline | version ${params.version}
 ===============================================================================
-Usage: nextflow run ikmb/XXX 
+Usage: nextflow run ikmb/vcf-concordance
 
 Required parameters:
 --email 		       Email address to send reports to (enclosed in '')
+--vcf				A vcf file of regular expression of multiple VCF files
+--assembly			Version of the human genome to use (default: hg38)
+--reference			ID of the Genome-in-a-bottle reference to compare against
 Optional parameters:
+--bed                           BED file with calling intervals to compare against. This would be your exome capture kit. Leave empty if analyzing WGS data. 
+--ref_vcf			Path to an alternative reference VCF (instead of --reference)
+--ref_bed			Path to an alterantive reference (high-confidence) BED file (instead of --reference)
 
 Expert options (usually not necessary to change!):
 
@@ -41,109 +47,139 @@ if (params.help){
     exit 0
 }
 
+if (!params.genomes.containsKey(params.assembly)) {
+	exit 1, "This assembly does not seem to be defined..."
+}
+if (!params.genomes[ params.assembly ].containsKey(params.reference)) {
+	exit 1, "This reference does not seem to be defined for this assembly yet..."
+}
+if (params.reference) {
+	giab_vcf = file(params.genomes[ params.assembly ][params.reference].vcf)
+	giab_bed = file(params.genomes[ params.assembly ][params.reference].bed)
+} else if (params.ref_vcf && params.ref_bed) {
+	giab_vcf = file(params.ref_vcf)
+	giab_bed = file(params.ref_bed)
+} else {
+	exit 1, "Missing a reference to compare against!"
+}
+
+fasta = file(params.genomes[ params.assembly ].fasta)
+
+// Channels
+Channel.fromPath(giab_bed)
+	.ifEmpty { exit 1; "Could not find the reference BED file (via --reference or --ref_bed)" }
+	.set { bed_giab }
+
+Channel.fromPath(giab_vcf)
+	.ifEmpty { exit 1, "Could not find the reference VCF file (via --reference or --ref_vcf)" }
+	.map { v -> [ file(v), file("${v}.tbi")] }
+	.set { vcf_giab }
+
+Channel.fromPath(params.vcf)
+	.ifEmpty { exit 1, "Could not find the VCF file(s) (--vcf)" }
+        .map { v -> [ file(v), file("${v}.tbi")] }
+	.set { vcf_file }
+
 def summary = [:]
 
 run_name = ( params.run_name == false) ? "${workflow.sessionId}" : "${params.run_name}"
 
-process get_software_versions {
+// User-provided provided bed if working with exome data
+if (params.bed) {
 
-    publishDir "${OUTDIR}/Summary/versions", mode: 'copy'
+	bed_kit = Channel.fromPath(params.bed)
 
-    output:
-    file("v*.txt")
-    file(yaml_file) into (software_versions_yaml_fastqc, software_versions_yaml_lib, software_versions_yaml_sample)
+	process bed_intersect {
 
-    script:
-    yaml_file = "software_versions_mqc.yaml"
+		label 'bedtools'
 
-    """
-    parse_versions.pl >  $yaml_file
-    """
+		input:
+		path(bed_k) from bed_kit
+		path(bed_g) from bed_giab
+
+		output:
+		path(bed) into bed_file
+
+		script:
+	
+		"""
+			bedtools intersect -a $bed_g -b $bed_k > $bed
+		"""
+	}
+
+} else {
+	bed_file = Channel.fromPath(giab_bed)
 }
 
-workflow.onComplete {
-  log.info "========================================="
-  log.info "Duration:		$workflow.duration"
-  log.info "========================================="
+log.info "VCF Concordance Check Pipeline thingy | ${workflow.manifest.version}"
+log.info "--------------------------------------------------------------------"
+log.info "Assembly: 	${params.assembly}"
+if (params.reference) {
+	log.info "Reference:	${params.reference}"
+}
+log.info "Input(s):	${params.vcf}"
+log.info "--------------------------------------------------------------------"
 
-  def email_fields = [:]
-  email_fields['version'] = workflow.manifest.version
-  email_fields['session'] = workflow.sessionId
-  email_fields['runName'] = run_name
-  email_fields['Samples'] = params.samples
-  email_fields['success'] = workflow.success
-  email_fields['dateStarted'] = workflow.start
-  email_fields['dateComplete'] = workflow.complete
-  email_fields['duration'] = workflow.duration
-  email_fields['exitStatus'] = workflow.exitStatus
-  email_fields['errorMessage'] = (workflow.errorMessage ?: 'None')
-  email_fields['errorReport'] = (workflow.errorReport ?: 'None')
-  email_fields['commandLine'] = workflow.commandLine
-  email_fields['projectDir'] = workflow.projectDir
-  email_fields['script_file'] = workflow.scriptFile
-  email_fields['launchDir'] = workflow.launchDir
-  email_fields['user'] = workflow.userName
-  email_fields['Pipeline script hash ID'] = workflow.scriptId
-  email_fields['manifest'] = workflow.manifest
-  email_fields['summary'] = summary
+process normalize {
 
-  email_info = ""
-  for (s in email_fields) {
-	email_info += "\n${s.key}: ${s.value}"
-  }
+	label 'gatk'
 
-  def output_d = new File( "${params.outdir}/pipeline_info/" )
-  if( !output_d.exists() ) {
-      output_d.mkdirs()
-  }
+	input:
+	tuple path(vcf),path(tbi) from vcf_file
 
-  def output_tf = new File( output_d, "pipeline_report.txt" )
-  output_tf.withWriter { w -> w << email_info }	
+	output:
+	tuple path(vcf_normalized),path(vcf_normalized_tbi) into input_happy
 
- // make txt template
-  def engine = new groovy.text.GStringTemplateEngine()
+	script:
+	vcf_normalized = vcf.getBaseName() + ".normalized.vcf.gz"
+	vcf_normalized_tbi = vcf_normalized + ".tbi"
 
-  def tf = new File("$baseDir/assets/email_template.txt")
-  def txt_template = engine.createTemplate(tf).make(email_fields)
-  def email_txt = txt_template.toString()
-
-  // make email template
-  def hf = new File("$baseDir/assets/email_template.html")
-  def html_template = engine.createTemplate(hf).make(email_fields)
-  def email_html = html_template.toString()
-  
-  def subject = "Pipeline finished ($run_name)."
-
-  if (params.email) {
-
-  	def mqc_report = null
-  	try {
-        	if (workflow.success && !params.skip_multiqc) {
-            		mqc_report = multiqc_report.getVal()
-            		if (mqc_report.getClass() == ArrayList){
-                		log.warn "[PIpeline] Found multiple reports from process 'multiqc', will use only one"
-                		mqc_report = mqc_report[0]
-                	}
-        	}
-    	} catch (all) {
-        	log.warn "[IKMB ExoSeq] Could not attach MultiQC report to summary email"
-  	}
-
-	def smail_fields = [ email: params.email, subject: subject, email_txt: email_txt, email_html: email_html, baseDir: "$baseDir", mqcFile: mqc_report, mqcMaxSize: params.maxMultiqcEmailFileSize.toBytes() ]
-	def sf = new File("$baseDir/assets/sendmail_template.txt")	
-    	def sendmail_template = engine.createTemplate(sf).make(smail_fields)
-    	def sendmail_html = sendmail_template.toString()
-
-	try {
-          if( params.plaintext_email ){ throw GroovyException('Send plaintext e-mail, not HTML') }
-          // Try to send HTML e-mail using sendmail
-          [ 'sendmail', '-t' ].execute() << sendmail_html
-        } catch (all) {
-          // Catch failures and try with plaintext
-          [ 'mail', '-s', subject, params.email ].execute() << email_txt
-        }
-
-  }
-
+	"""
+		gatk SelectVariants -R $fasta --exclude-filtered --exclude-non-variants --remove-unused-alternates -V $vcf -OVI -O tmp.vcf.gz 
+		gatk LeftAlignAndTrimVariants -R $fasta -V tmp.vcf.gz -O $vcf_normalized -OVI
+		rm tmp.vcf.gz
+	"""
 }
 
+process normalize_ref {
+
+        label 'gatk'
+
+        input:
+        tuple path(vcf),path(tbi) from vcf_giab
+
+        output:
+        tuple path(vcf_normalized),path(vcf_normalized_tbi) into giab_happy
+
+        script:
+        vcf_normalized = vcf.getBaseName() + ".normalized.vcf.gz"
+        vcf_normalized_tbi = vcf_normalized + ".tbi"
+
+        """
+                gatk SelectVariants -R $fasta --exclude-filtered --exclude-non-variants --remove-unused-alternates -V $vcf -OVI -O tmp.vcf.gz
+                gatk LeftAlignAndTrimVariants -R $fasta -V tmp.vcf.gz -O $vcf_normalized -OVI
+                rm tmp.vcf.gz
+        """
+}
+process happy {
+
+	label 'happy'
+
+	publishDir "${params.outdir}/Happy", mode: 'copy'
+
+	input:
+	tuple path(vcf_r),path(vcf_r_tbi) from giab_happy.collect()
+	tuple path(vcf),path(vcf_tbi) from input_happy
+	path(bed) from bed_file.collect()
+
+	output:
+	path(summary_csv)
+
+	script:
+	summary = vcf.getBaseName() 
+
+	"""
+		hap.py $vcf_r $vcf -T $bed -o $summary -r $fasta
+	"""
+
+}
