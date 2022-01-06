@@ -141,26 +141,6 @@ process normalize {
 	"""
 }
 
-process normalize_ref {
-
-        label 'gatk'
-
-        input:
-        tuple path(vcf),path(tbi) from vcf_giab
-
-        output:
-        tuple path(vcf_normalized),path(vcf_normalized_tbi) into giab_happy
-
-        script:
-        vcf_normalized = vcf.getBaseName() + ".normalized.vcf.gz"
-        vcf_normalized_tbi = vcf_normalized + ".tbi"
-
-        """
-                gatk SelectVariants -R $fasta --exclude-filtered --exclude-non-variants --remove-unused-alternates -V $vcf -OVI -O tmp.vcf.gz
-                gatk LeftAlignAndTrimVariants -R $fasta -V tmp.vcf.gz -O $vcf_normalized -OVI
-                rm tmp.vcf.gz
-        """
-}
 process happy {
 
 	label 'happy'
@@ -168,7 +148,7 @@ process happy {
 	publishDir "${params.outdir}/Happy", mode: 'copy'
 
 	input:
-	tuple path(vcf_r),path(vcf_r_tbi) from giab_happy.collect()
+	tuple path(vcf_r),path(vcf_r_tbi) from vcf_giab.collect()
 	tuple path(vcf),path(vcf_tbi) from input_happy
 	path(bed) from bed_file.collect()
 
@@ -176,10 +156,11 @@ process happy {
 	path(summary_csv)
 
 	script:
-	summary = vcf.getBaseName() 
+	base = vcf.getBaseName()
+	summary_csv = base + ".summary.csv"
 
 	"""
-		hap.py $vcf_r $vcf -T $bed -o $summary -r $fasta
+		hap.py $vcf_r $vcf -T $bed -o $base -r $fasta
 	"""
 
 }

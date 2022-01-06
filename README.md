@@ -2,6 +2,8 @@
 
 # Pipeline
 
+This pipeline can be used to "quickly" check a VCF file against e.g. the Genome-in-a-Bottle benchmark callset to determine accuracy of your calling workflow. 
+
 ## Documentation 
 
 1. [What happens in this pipeline?](docs/pipeline.md)
