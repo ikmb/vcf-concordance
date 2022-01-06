@@ -2,6 +2,8 @@
 
 ## Basic execution
 
+This pipeline requires Nextflow and Singularity to be loaded/available. 
+
 To run the pipeline on the IKMB MedCluster, the following command should work:
 
 ```bash
@@ -27,8 +29,7 @@ The ID of a Genome-in-a-Bottle reference. Valid options are:
 - NA24695
 
 ### `--bed`
-A Bed file of e.g. your captured targets (exomes, panels). 
-
+A Bed file of e.g. your captured targets (exomes, panels). If you do not want to limit the analysis to any particular region(s), just leave this option empty. 
 
 ### `--assembly`
 The human genome build to use. The default option is hg38 - other options are not currently configured. 
