@@ -99,9 +99,9 @@ if (params.bed) {
 
 		output:
 		path(bed) into bed_file
-
-		script:
 	
+		script:
+		bed = "calling_regions.bed"
 		"""
 			bedtools intersect -a $bed_g -b $bed_k > $bed
 		"""
