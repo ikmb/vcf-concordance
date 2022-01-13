@@ -50,8 +50,11 @@ if (params.help){
 if (!params.genomes.containsKey(params.assembly)) {
 	exit 1, "This assembly does not seem to be defined..."
 }
-if (!params.genomes[ params.assembly ].containsKey(params.reference)) {
+if (!params.ref_vcf && !params.genomes[ params.assembly ].containsKey(params.reference)) {
 	exit 1, "This reference does not seem to be defined for this assembly yet..."
+}
+if(params.ref_vcf && !params.ref_bed && params.bed) {
+	params.ref_bed = params.bed
 }
 if (params.reference) {
 	giab_vcf = file(params.genomes[ params.assembly ][params.reference].vcf)
@@ -141,6 +144,29 @@ process normalize {
 	"""
 }
 
+process normalize_ref {
+
+	label 'gatk'
+
+        input:
+        tuple path(vcf),path(tbi) from vcf_giab
+
+        output:
+        tuple path(vcf_normalized),path(vcf_normalized_tbi) into giab_happy
+
+        script:
+        vcf_normalized = vcf.getBaseName() + ".normalized.vcf.gz"
+        vcf_normalized_tbi = vcf_normalized + ".tbi"
+
+        """
+                gatk SelectVariants -R $fasta --exclude-filtered --exclude-non-variants --remove-unused-alternates -V $vcf -OVI -O tmp.vcf.gz
+                gatk LeftAlignAndTrimVariants -R $fasta -V tmp.vcf.gz -O $vcf_normalized -OVI
+                rm tmp.vcf.gz
+        """
+}
+
+
+
 process happy {
 
 	label 'happy'
@@ -148,7 +174,7 @@ process happy {
 	publishDir "${params.outdir}/Happy", mode: 'copy'
 
 	input:
-	tuple path(vcf_r),path(vcf_r_tbi) from vcf_giab.collect()
+	tuple path(vcf_r),path(vcf_r_tbi) from giab_happy.collect()
 	tuple path(vcf),path(vcf_tbi) from input_happy
 	path(bed) from bed_file.collect()
 
