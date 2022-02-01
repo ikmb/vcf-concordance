@@ -50,18 +50,27 @@ if (params.help){
 if (!params.genomes.containsKey(params.assembly)) {
 	exit 1, "This assembly does not seem to be defined..."
 }
-if (!params.ref_vcf && !params.genomes[ params.assembly ].containsKey(params.reference)) {
+if(!params.ref_vcf && !params.reference) {
+	exit 1, "Must specifiy an existing reference or provide a reference in VCF format"
+} else if (!params.genomes[ params.assembly ].containsKey(params.reference)) {
 	exit 1, "This reference does not seem to be defined for this assembly yet..."
 }
-if(params.ref_vcf && !params.ref_bed && params.bed) {
-	params.ref_bed = params.bed
-}
+//A custom reference is given - how do we determine regions of interest
+if (params.ref_vcf) {
+	if (params.ref_bed) {
+		ref_bed = params.ref_bed
+	} else if (params.bed) {
+		ref_bed = params.bed
+	}
+} 
+// We have a reference specified
 if (params.reference) {
 	giab_vcf = file(params.genomes[ params.assembly ][params.reference].vcf)
 	giab_bed = file(params.genomes[ params.assembly ][params.reference].bed)
-} else if (params.ref_vcf && params.ref_bed) {
+// Instead, a reference is provided manually
+} else if (params.ref_vcf) {
 	giab_vcf = file(params.ref_vcf)
-	giab_bed = file(params.ref_bed)
+	giab_bed = file(ref_bed)
 } else {
 	exit 1, "Missing a reference to compare against!"
 }
@@ -104,7 +113,9 @@ if (params.bed) {
 		path(bed) into bed_file
 	
 		script:
+
 		bed = "calling_regions.bed"
+
 		"""
 			bedtools intersect -a $bed_g -b $bed_k > $bed
 		"""
@@ -164,6 +175,8 @@ process happy {
 
 	"""
 		hap.py $vcf_r $vcf -T $bed -o $base -r $fasta
+		sed -i.bak 's/,/	/g' $summary_csv
 	"""
 
 }
+	
