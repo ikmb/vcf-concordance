@@ -52,7 +52,7 @@ if (!params.genomes.containsKey(params.assembly)) {
 }
 if(!params.ref_vcf && !params.reference) {
 	exit 1, "Must specifiy an existing reference or provide a reference in VCF format"
-} else if (!params.genomes[ params.assembly ].containsKey(params.reference)) {
+} else if (params.reference && !params.genomes[ params.assembly ].containsKey(params.reference)) {
 	exit 1, "This reference does not seem to be defined for this assembly yet..."
 }
 //A custom reference is given - how do we determine regions of interest
@@ -130,6 +130,9 @@ log.info "--------------------------------------------------------------------"
 log.info "Assembly: 	${params.assembly}"
 if (params.reference) {
 	log.info "Reference:	${params.reference}"
+}
+if (params.bed) {
+	log.info "BED file:	${params.bed}"
 }
 log.info "Input(s):	${params.vcf}"
 log.info "--------------------------------------------------------------------"
