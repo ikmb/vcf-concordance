@@ -96,6 +96,18 @@ def summary = [:]
 
 run_name = ( params.run_name == false) ? "${workflow.sessionId}" : "${params.run_name}"
 
+log.info "VCF Concordance Check Pipeline thingy | ${workflow.manifest.version}"
+log.info "--------------------------------------------------------------------"
+log.info "Assembly:     ${params.assembly}"
+if (params.reference) {
+        log.info "Reference:    ${params.reference}"
+}
+if (params.bed) {
+        log.info "BED file:     ${params.bed}"
+}
+log.info "Input(s):     ${params.vcf}"
+log.info "--------------------------------------------------------------------"
+
 // User-provided provided bed if working with exome data
 if (params.bed) {
 
@@ -124,18 +136,6 @@ if (params.bed) {
 } else {
 	bed_file = Channel.fromPath(giab_bed)
 }
-
-log.info "VCF Concordance Check Pipeline thingy | ${workflow.manifest.version}"
-log.info "--------------------------------------------------------------------"
-log.info "Assembly: 	${params.assembly}"
-if (params.reference) {
-	log.info "Reference:	${params.reference}"
-}
-if (params.bed) {
-	log.info "BED file:	${params.bed}"
-}
-log.info "Input(s):	${params.vcf}"
-log.info "--------------------------------------------------------------------"
 
 process normalize {
 
