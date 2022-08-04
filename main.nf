@@ -47,12 +47,12 @@ if (params.help){
     exit 0
 }
 
-if (!params.genomes.containsKey(params.assembly)) {
+if (!params.genomes[params.version].containsKey(params.assembly)) {
 	exit 1, "This assembly does not seem to be defined..."
 }
 if(!params.ref_vcf && !params.reference) {
 	exit 1, "Must specifiy an existing reference or provide a reference in VCF format"
-} else if (params.reference && !params.genomes[ params.assembly ].containsKey(params.reference)) {
+} else if (params.reference && !params.genomes[params.version][ params.assembly ].containsKey(params.reference)) {
 	exit 1, "This reference does not seem to be defined for this assembly yet..."
 }
 //A custom reference is given - how do we determine regions of interest
@@ -65,8 +65,8 @@ if (params.ref_vcf) {
 } 
 // We have a reference specified
 if (params.reference) {
-	giab_vcf = file(params.genomes[ params.assembly ][params.reference].vcf)
-	giab_bed = file(params.genomes[ params.assembly ][params.reference].bed)
+	giab_vcf = file(params.genomes[params.version][ params.assembly ][params.reference].vcf, checkIfExists: true)
+	giab_bed = file(params.genomes[params.version][ params.assembly ][params.reference].bed, checkIfExists: true)
 // Instead, a reference is provided manually
 } else if (params.ref_vcf) {
 	giab_vcf = file(params.ref_vcf)
@@ -75,7 +75,7 @@ if (params.reference) {
 	exit 1, "Missing a reference to compare against!"
 }
 
-fasta = file(params.genomes[ params.assembly ].fasta)
+fasta = file(params.genomes[params.version][ params.assembly ].fasta, checkIfExists: true)
 
 // Channels
 Channel.fromPath(giab_bed)
@@ -84,12 +84,12 @@ Channel.fromPath(giab_bed)
 
 Channel.fromPath(giab_vcf)
 	.ifEmpty { exit 1, "Could not find the reference VCF file (via --reference or --ref_vcf)" }
-	.map { v -> [ file(v), file("${v}.tbi")] }
+	.map { v -> [ file(v), file("${v}.tbi", checkIfExists: true)] }
 	.set { vcf_giab }
 
 Channel.fromPath(params.vcf)
 	.ifEmpty { exit 1, "Could not find the VCF file(s) (--vcf)" }
-        .map { v -> [ file(v), file("${v}.tbi")] }
+        .map { v -> [ file(v), file("${v}.tbi", checkIfExists: true)] }
 	.set { vcf_file }
 
 def summary = [:]
