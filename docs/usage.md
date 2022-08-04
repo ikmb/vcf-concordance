@@ -14,6 +14,9 @@ The options are described in the following:
 
 ## Options
 
+### `--version`
+Release version of GIAB to use (3.3.1, 4.2.1 (default)). Note that 4.2.1 uses patch 14 of GRCh38; whereas 3.3.1 is based on an older version. 
+
 ### `--vcf`
 A gzipped, indexed (!) VCF file to be benchmarked. 
 
