@@ -1,0 +1,86 @@
+params {
+
+   genomes {
+
+	'v3' {
+
+		'hg38' {
+			fasta = "${gatk_bundle_path}/hg38/Homo_sapiens_assembly38.fasta"
+			'NA12878' {
+				vcf = "${giab_path}/NA12878/3.3.2/GRCh38/HG001_GRCh38_GIAB_highconf_CG-IllFB-IllGATKHC-Ion-10X-SOLID_CHROM1-X_v.3.3.2_highconf_PGandRTGphasetransfer.vcf.gz"
+				bed = "${giab_path}/NA12878/3.3.2/GRCh38/HG001_GRCh38_GIAB_highconf_CG-IllFB-IllGATKHC-Ion-10X-SOLID_CHROM1-X_v.3.3.2_highconf_nosomaticdel_noCENorHET7.bed"
+			}
+			'NA24143' {
+				vcf = "${giab_path}/AshkenazimTrio/3.3.2/HG004_NA24143_mother/NISTv3.3.2/GRCh38/HG004_GRCh38_GIAB_highconf_CG-Illfb-IllsentieonHC-Ion-10XsentieonHC_CHROM1-22_v.3.3.2_highconf.vcf.gz"
+				bed = "${giab_path}/AshkenazimTrio/3.3.2/HG004_NA24143_mother/NISTv3.3.2/GRCh38/HG004_GRCh38_GIAB_highconf_CG-Illfb-IllsentieonHC-Ion-10XsentieonHC_CHROM1-22_v.3.3.2_highconf_noinconsistent.bed"
+			}
+			'NA24149' {
+				vcf = "${giab_path}/AshkenazimTrio/3.3.2/HG003_NA24149_father/NISTv3.3.2/GRCh38/HG003_GRCh38_GIAB_highconf_CG-Illfb-IllsentieonHC-Ion-10XsentieonHC_CHROM1-22_v.3.3.2_highconf.vcf.gz"
+				bed = "${giab_path}/AshkenazimTrio/3.3.2/HG003_NA24149_father/NISTv3.3.2/GRCh38/HG003_GRCh38_GIAB_highconf_CG-Illfb-IllsentieonHC-Ion-10XsentieonHC_CHROM1-22_v.3.3.2_highconf_noinconsistent.bed"
+			}
+			'NA24385' {
+				vcf = "${giab_path}/AshkenazimTrio/3.3.2/HG002_NA24385_son/NISTv3.3.2/GRCh38/supplementaryFiles/HG002_GRCh38_GIAB_highconf_CG-Illfb-IllsentieonHC-Ion-10XsentieonHC-SOLIDgatkHC_CHROM1-22_v.3.3.2_highconf.vcf.gz"
+				bed = "${giab_path}/AshkenazimTrio/3.3.2/HG002_NA24385_son/NISTv3.3.2/GRCh38/HG002_GRCh38_GIAB_highconf_CG-Illfb-IllsentieonHC-Ion-10XsentieonHC-SOLIDgatkHC_CHROM1-22_v.3.3.2_highconf_noinconsistent.bed"
+			}
+			'NA24631' {
+				vcf = "${giab_path}/ChineseTrio/HG005_NA24631_son/NISTv3.3.2/GRCh38/HG005_GRCh38_GIAB_highconf_CG-Illfb-IllsentieonHC-Ion-10XsentieonHC-SOLIDgatkHC_CHROM1-22_v.3.3.2_highconf.vcf.gz"
+				bed = "${giab_path}/ChineseTrio/HG005_NA24631_son/NISTv3.3.2/GRCh38/HG005_GRCh38_GIAB_highconf_CG-Illfb-IllsentieonHC-Ion-10XsentieonHC-SOLIDgatkHC_CHROM1-22_v.3.3.2_highconf.bed"
+			}
+			'NA24694' {
+				vcf = "${giab_path}/ChineseTrio/HG006_NA24694_father/NISTv3.3.2/GRCh38/HG006_GIAB_GRCh38_highconf_CG-IllFB-IllSNT-10X_CHROM1-22_v.3.3.2_highconf.vcf.gz"
+				bed = "${giab_path}/ChineseTrio/HG006_NA24694_father/NISTv3.3.2/GRCh38/HG006_GIAB_GRCh38_highconf_CG-IllFB-IllSNT-10X_CHROM1-22_v.3.3.2_highconf_noinconsistent.bed"
+			}
+			'NA24695' {
+				vcf = "${giab_path}/ChineseTrio/HG007_NA24695_mother/NISTv3.3.2/GRCh38/HG007_GIAB_GRCh38_highconf_CG-IllFB-IllSNT-10X_CHROM1-22_v.3.3.2_highconf.vcf.gz"
+				bed = "${giab_path}/ChineseTrio/HG007_NA24695_mother/NISTv3.3.2/GRCh38/HG007_GIAB_GRCh38_highconf_CG-IllFB-IllSNT-10X_CHROM1-22_v.3.3.2_highconf_noinconsistent.bed"
+			}	
+			'CHM' {
+                	        vcf = "/work_ifs/ikmb_repository/references/CHM/CHM-eval.kit/full.38.vcf.gz"
+                        	bed = "/work_ifs/ikmb_repository/references/CHM/CHM-eval.kit/full.38.bed"
+	                }
+		}  			
+		'GRCh38' {
+			fasta = "${gatk_bundle_path}/hg38_no_alt/Homo_sapiens_GRCh38_no_alts.fa"
+			'NA12878' {
+                        	vcf = "${giab_path}/NA12878/3.3.2/GRCh38/HG001_GRCh38_GIAB_highconf_CG-IllFB-IllGATKHC-Ion-10X-SOLID_CHROM1-X_v.3.3.2_highconf_PGandRTGphasetransfer.vcf.gz"
+	                        bed = "${giab_path}/NA12878/3.3.2/GRCh38/HG001_GRCh38_GIAB_highconf_CG-IllFB-IllGATKHC-Ion-10X-SOLID_CHROM1-X_v.3.3.2_highconf_nosomaticdel_noCENorHET7.bed"
+        	        }
+                	'NA24143' {
+	                        vcf = "${giab_path}/AshkenazimTrio/3.3.2/HG004_NA24143_mother/NISTv3.3.2/GRCh38/HG004_GRCh38_GIAB_highconf_CG-Illfb-IllsentieonHC-Ion-10XsentieonHC_CHROM1-22_v.3.3.2_highconf.vcf.gz"
+        	                bed = "${giab_path}/AshkenazimTrio/3.3.2/HG004_NA24143_mother/NISTv3.3.2/GRCh38/HG004_GRCh38_GIAB_highconf_CG-Illfb-IllsentieonHC-Ion-10XsentieonHC_CHROM1-22_v.3.3.2_highconf_noinconsistent.bed"
+	                }
+        	        'NA24149' {
+                	        vcf = "${giab_path}/AshkenazimTrio/3.3.2/HG003_NA24149_father/NISTv3.3.2/GRCh38/HG003_GRCh38_GIAB_highconf_CG-Illfb-IllsentieonHC-Ion-10XsentieonHC_CHROM1-22_v.3.3.2_highconf.vcf.gz"
+                        	bed = "${giab_path}/AshkenazimTrio/3.3.2/HG003_NA24149_father/NISTv3.3.2/GRCh38/HG003_GRCh38_GIAB_highconf_CG-Illfb-IllsentieonHC-Ion-10XsentieonHC_CHROM1-22_v.3.3.2_highconf_noinconsistent.bed"
+	                }
+        	        'NA24385' {
+                	        vcf = "${giab_path}/AshkenazimTrio/3.3.2/HG002_NA24385_son/NISTv3.3.2/GRCh38/supplementaryFiles/HG002_GRCh38_GIAB_highconf_CG-Illfb-IllsentieonHC-Ion-10XsentieonHC-SOLIDgatkHC_CHROM1-22_v.3.3.2_highconf.vcf.gz"
+                        	bed = "${giab_path}/AshkenazimTrio/3.3.2/HG002_NA24385_son/NISTv3.3.2/GRCh38/HG002_GRCh38_GIAB_highconf_CG-Illfb-IllsentieonHC-Ion-10XsentieonHC-SOLIDgatkHC_CHROM1-22_v.3.3.2_highconf_noinconsistent.bed"
+	                }
+        	        'NA24631' {
+                	        vcf = "${giab_path}/ChineseTrio/HG005_NA24631_son/NISTv3.3.2/GRCh38/HG005_GRCh38_GIAB_highconf_CG-Illfb-IllsentieonHC-Ion-10XsentieonHC-SOLIDgatkHC_CHROM1-22_v.3.3.2_highconf.vcf.gz"
+                        	bed = "${giab_path}/ChineseTrio/HG005_NA24631_son/NISTv3.3.2/GRCh38/HG005_GRCh38_GIAB_highconf_CG-Illfb-IllsentieonHC-Ion-10XsentieonHC-SOLIDgatkHC_CHROM1-22_v.3.3.2_highconf.bed"
+	                }
+        	        'NA24694' {
+                	        vcf = "${giab_path}/ChineseTrio/HG006_NA24694_father/NISTv3.3.2/GRCh38/HG006_GIAB_GRCh38_highconf_CG-IllFB-IllSNT-10X_CHROM1-22_v.3.3.2_highconf.vcf.gz"
+                        	bed = "${giab_path}/ChineseTrio/HG006_NA24694_father/NISTv3.3.2/GRCh38/HG006_GIAB_GRCh38_highconf_CG-IllFB-IllSNT-10X_CHROM1-22_v.3.3.2_highconf_noinconsistent.bed"
+	                }
+        	        'NA24695' {
+                	        vcf = "${giab_path}/ChineseTrio/HG007_NA24695_mother/NISTv3.3.2/GRCh38/HG007_GIAB_GRCh38_highconf_CG-IllFB-IllSNT-10X_CHROM1-22_v.3.3.2_highconf.vcf.gz"
+                        	bed = "${giab_path}/ChineseTrio/HG007_NA24695_mother/NISTv3.3.2/GRCh38/HG007_GIAB_GRCh38_highconf_CG-IllFB-IllSNT-10X_CHROM1-22_v.3.3.2_highconf_noinconsistent.bed"
+	                }
+			'CHM' {
+				vcf = "/work_ifs/ikmb_repository/references/CHM/CHM-eval.kit/full.38.vcf.gz"
+				bed = "/work_ifs/ikmb_repository/references/CHM/CHM-eval.kit/full.38.bed"
+			}
+
+		}        
+	        'GRCh37' {
+        	        fasta = "${gatk_bundle_path}/b37/human_g1k_v37_decoy.fasta"
+	        }
+	}
+
+        
+  }
+  
+}

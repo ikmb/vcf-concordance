@@ -14,12 +14,12 @@ git@github.com:ikmb/pipeline.git
 
 // Pipeline version
 
-params.version = workflow.manifest.version
+params.pipe_version = workflow.manifest.version
 
 // Help message
 helpMessage = """
 ===============================================================================
-IKMB variant concordance pipeline | version ${params.version}
+IKMB variant concordance pipeline | version ${params.pipe_version}
 ===============================================================================
 Usage: nextflow run ikmb/vcf-concordance
 
@@ -47,12 +47,12 @@ if (params.help){
     exit 0
 }
 
-if (!params.genomes[params.version].containsKey(params.assembly)) {
+if (!params.genomes[params.ref_version].containsKey(params.assembly)) {
 	exit 1, "This assembly does not seem to be defined..."
 }
 if(!params.ref_vcf && !params.reference) {
 	exit 1, "Must specifiy an existing reference or provide a reference in VCF format"
-} else if (params.reference && !params.genomes[params.version][ params.assembly ].containsKey(params.reference)) {
+} else if (params.reference && !params.genomes[params.ref_version][ params.assembly ].containsKey(params.reference)) {
 	exit 1, "This reference does not seem to be defined for this assembly yet..."
 }
 //A custom reference is given - how do we determine regions of interest
@@ -65,8 +65,9 @@ if (params.ref_vcf) {
 } 
 // We have a reference specified
 if (params.reference) {
-	giab_vcf = file(params.genomes[params.version][ params.assembly ][params.reference].vcf, checkIfExists: true)
-	giab_bed = file(params.genomes[params.version][ params.assembly ][params.reference].bed, checkIfExists: true)
+	giab_vcf = file(params.genomes[params.ref_version][ params.assembly ][params.reference].vcf, checkIfExists: true)
+	giab_bed = file(params.genomes[params.ref_version][ params.assembly ][params.reference].bed, checkIfExists: true)
+        log.info "Using ${params.genomes[params.ref_version][ params.assembly ][params.reference].vcf} as reference"
 // Instead, a reference is provided manually
 } else if (params.ref_vcf) {
 	giab_vcf = file(params.ref_vcf)
@@ -75,7 +76,7 @@ if (params.reference) {
 	exit 1, "Missing a reference to compare against!"
 }
 
-fasta = file(params.genomes[params.version][ params.assembly ].fasta, checkIfExists: true)
+fasta = file(params.genomes[params.ref_version][ params.assembly ].fasta, checkIfExists: true)
 
 // Channels
 Channel.fromPath(giab_bed)
